@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: spring-modulith-test1
+
+# Logging configuration
+logging:
+  level:
+    dev.neate: DEBUG
+    org.springframework.modulith: DEBUG
