@@ -11,13 +11,13 @@
 | Module | Tasks | Completed | In Progress | Not Started |
 |--------|-------|-----------|-------------|-------------|
 | Application | 1 | 1 | 0 | 0 |
-| Domain | 5 | 1 | 0 | 4 |
+| Domain | 5 | 5 | 0 | 0 |
 | API | 3 | 0 | 0 | 3 |
 | Validation | 3 | 0 | 0 | 3 |
 | Enrichment | 4 | 0 | 0 | 4 |
 | Event | 3 | 0 | 0 | 3 |
 | Testing | 3 | 0 | 0 | 3 |
-| **TOTAL** | **25** | **2** | **0** | **23** |
+| **TOTAL** | **25** | **6** | **0** | **19** |
 
 ---
 
@@ -70,39 +70,64 @@
 
 ---
 
-### ⬜ Task 2.2: Create Country Entity
-**Status**: NOT STARTED  
+### ✅ Task 2.2: Create Country Entity
+**Status**: COMPLETED  
 **Dependencies**: Task 2.1 ✅  
-**Started**: -  
-**Completed**: -  
-**Notes**:
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
+**Notes**: 
+- Created Country entity in dev.neate.domain package
+- Annotated with @Document for MongoDB (collection: countries)
+- Includes all required fields: id, name, code, currency, language, population, validCountry
+- MongoDB auto-generates ObjectId for id field
+- Default value for validCountry set to false
+- Created comprehensive unit tests (5 tests)
+- All tests passing (17/17)
 
 ---
 
-### 🔒 Task 2.3: Create Country Repository
-**Status**: LOCKED  
-**Dependencies**: Task 2.2  
-**Started**: -  
-**Completed**: -  
-**Notes**:
+### ✅ Task 2.3: Create Country Repository
+**Status**: COMPLETED  
+**Dependencies**: Task 2.2 ✅  
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
+**Notes**: 
+- Created CountryRepository interface in dev.neate.domain.internal package
+- Package-private (internal) - not directly accessible from other modules
+- Extends MongoRepository<Country, String> for CRUD operations
+- Created comprehensive repository tests (6 tests)
+- All tests passing (23/23)
+- Repository successfully integrated with MongoDB via Testcontainers
 
 ---
 
-### 🔒 Task 2.4: Create CountryService Interface
-**Status**: LOCKED  
-**Dependencies**: Task 2.2  
-**Started**: -  
-**Completed**: -  
-**Notes**:
+### ✅ Task 2.4: Create CountryService Interface
+**Status**: COMPLETED  
+**Dependencies**: Task 2.2 ✅  
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
+**Notes**: 
+- Created CountryService interface in dev.neate.domain package
+- Public interface accessible from other modules
+- Defines save, findById, and update operations
+- Well-documented with JavaDoc
 
 ---
 
-### 🔒 Task 2.5: Implement CountryService
-**Status**: LOCKED  
-**Dependencies**: Task 2.3, Task 2.4  
-**Started**: -  
-**Completed**: -  
-**Notes**:
+### ✅ Task 2.5: Implement CountryService
+**Status**: COMPLETED  
+**Dependencies**: Task 2.3 ✅, Task 2.4 ✅  
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
+**Notes**: 
+- Created CountryServiceImpl in dev.neate.domain.internal package
+- Package-private implementation with @Service annotation
+- Encapsulates CountryRepository access
+- Implements validation logic for update operations
+- Throws IllegalArgumentException for invalid operations
+- Created comprehensive service tests (8 tests)
+- All tests passing (31/31)
+- Domain Module complete!
 
 ---
 
@@ -308,7 +333,7 @@
 ## Completion Milestones
 
 - [x] **Milestone 1**: Application Module Complete (Task 1.1 ✅)
-- [ ] **Milestone 2**: Domain Module Complete (Tasks 2.1-2.5)
+- [x] **Milestone 2**: Domain Module Complete (Tasks 2.1 ✅, 2.2 ✅, 2.3 ✅, 2.4 ✅, 2.5 ✅)
 - [ ] **Milestone 3**: API Module Complete (Tasks 3.1-3.3)
 - [ ] **Milestone 4**: Validation Module Complete (Tasks 4.1-4.3)
 - [ ] **Milestone 5**: Enrichment Module Complete (Tasks 5.1-5.4)
@@ -332,7 +357,10 @@
 **Date**: 2025-12-05  
 **Note**: Task 2.1 completed. MongoDB and Spring Modulith event publication configured with Testcontainers for testing. All 12 tests passing. Event publication registry successfully using MongoDB backend.
 
+**Date**: 2025-12-05  
+**Note**: Domain Module complete! Tasks 2.2-2.5 implemented: Country entity, CountryRepository, CountryService interface and implementation. All 31 tests passing. Proper encapsulation with internal packages. Milestone 2 achieved.
+
 ---
 
 *Last Updated*: 2025-12-05  
-*Updated By*: Task 2.1 Completion
+*Updated By*: Domain Module Completion
