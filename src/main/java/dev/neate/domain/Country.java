@@ -3,6 +3,8 @@ package dev.neate.domain;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.UUID;
+
 /**
  * MongoDB entity representing a country.
  * 
@@ -10,14 +12,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * enrichment data, and validation status. It is part of the Domain module's
  * public API and can be accessed by other modules.
  * 
- * The entity uses MongoDB's ObjectId for the primary key, which is
- * auto-generated when the document is first saved.
+ * The entity uses UUID for the primary key for consistent identification
+ * across distributed systems.
  */
 @Document(collection = "countries")
 public class Country {
 
     @Id
-    private String id; // MongoDB auto-generated ObjectId
+    private UUID id; // UUID for unique identification
 
     private String name;
     private String code; // ISO 3166-1 alpha-2 code
@@ -47,11 +49,11 @@ public class Country {
 
     // Getters and Setters
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

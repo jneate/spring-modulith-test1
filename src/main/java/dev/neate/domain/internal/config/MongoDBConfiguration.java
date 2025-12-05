@@ -1,25 +1,36 @@
 package dev.neate.domain.internal.config;
 
+import com.mongodb.MongoClientSettings;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 /**
  * MongoDB configuration for the Domain module.
  * 
- * This configuration enables MongoDB repositories and is managed within
- * the Domain module as part of its internal infrastructure.
+ * This configuration:
+ * - Enables MongoDB repositories for the domain.internal package
+ * - Configures UUID representation for proper UUID storage
+ * - Integrates with Spring Modulith's event publication registry
  * 
- * Configuration properties are externalized via application.yml:
- * - spring.data.mongodb.uri: MongoDB connection URI (default: mongodb://localhost:27017)
- * - spring.data.mongodb.database: Database name (default: country-db)
+ * The repository scanning is limited to the internal package to maintain
+ * proper encapsulation - only the internal implementation has direct
+ * database access.
  * 
- * Spring Modulith event publication is automatically configured via
- * spring-modulith-starter-mongodb dependency, which uses the same MongoDB
- * connection for persisting event publications.
+ * Connection details (URI, database name) are configured in application.yml
+ * and can be overridden via environment variables.
  */
 @Configuration
 @EnableMongoRepositories(basePackages = "dev.neate.domain.internal")
-public class MongoDBConfiguration {
-    // MongoDB auto-configuration from Spring Boot handles connection setup
-    // Event publication registry is auto-configured by Spring Modulith
+public class MongoDBConfiguration extends AbstractMongoClientConfiguration {
+
+    @Override
+    protected String getDatabaseName() {
+        return "country-db";
+    }
+
+    @Override
+    protected void configureClientSettings(MongoClientSettings.Builder builder) {
+        builder.uuidRepresentation(org.bson.UuidRepresentation.STANDARD);
+    }
 }

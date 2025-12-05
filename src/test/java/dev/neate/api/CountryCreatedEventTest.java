@@ -2,6 +2,8 @@ package dev.neate.api;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -18,7 +20,8 @@ class CountryCreatedEventTest {
     @Test
     void canCreateEvent() {
         // Create event
-        CountryCreatedEvent event = new CountryCreatedEvent("country-123");
+        UUID testId = UUID.randomUUID();
+        CountryCreatedEvent event = new CountryCreatedEvent(testId);
         
         assertThat(event)
             .as("Event should be created")
@@ -26,13 +29,13 @@ class CountryCreatedEventTest {
         
         assertThat(event.countryId())
             .as("Country ID should be set")
-            .isEqualTo("country-123");
+            .isEqualTo(testId);
     }
 
     @Test
     void eventIsImmutable() {
         // Create event
-        CountryCreatedEvent event = new CountryCreatedEvent("country-456");
+        CountryCreatedEvent event = new CountryCreatedEvent(UUID.randomUUID());
         
         // Verify it's a record (immutable)
         assertThat(event.getClass().isRecord())
@@ -43,8 +46,9 @@ class CountryCreatedEventTest {
     @Test
     void eventsWithSameIdAreEqual() {
         // Create two events with same ID
-        CountryCreatedEvent event1 = new CountryCreatedEvent("country-789");
-        CountryCreatedEvent event2 = new CountryCreatedEvent("country-789");
+        UUID testId = UUID.randomUUID();
+        CountryCreatedEvent event1 = new CountryCreatedEvent(testId);
+        CountryCreatedEvent event2 = new CountryCreatedEvent(testId);
         
         assertThat(event1)
             .as("Events with same ID should be equal")
@@ -58,8 +62,8 @@ class CountryCreatedEventTest {
     @Test
     void eventsWithDifferentIdsAreNotEqual() {
         // Create two events with different IDs
-        CountryCreatedEvent event1 = new CountryCreatedEvent("country-111");
-        CountryCreatedEvent event2 = new CountryCreatedEvent("country-222");
+        CountryCreatedEvent event1 = new CountryCreatedEvent(UUID.randomUUID());
+        CountryCreatedEvent event2 = new CountryCreatedEvent(UUID.randomUUID());
         
         assertThat(event1)
             .as("Events with different IDs should not be equal")
@@ -69,12 +73,13 @@ class CountryCreatedEventTest {
     @Test
     void toStringContainsCountryId() {
         // Create event
-        CountryCreatedEvent event = new CountryCreatedEvent("country-abc");
+        UUID testId = UUID.randomUUID();
+        CountryCreatedEvent event = new CountryCreatedEvent(testId);
         
         String toString = event.toString();
         
         assertThat(toString)
             .as("toString should contain country ID")
-            .contains("country-abc");
+            .contains(testId.toString());
     }
 }

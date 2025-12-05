@@ -5,6 +5,7 @@ import dev.neate.domain.CountryService;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Implementation of CountryService.
@@ -32,11 +33,15 @@ class CountryServiceImpl implements CountryService {
 
     @Override
     public Country save(Country country) {
+        // Generate UUID for new countries
+        if (country.getId() == null) {
+            country.setId(UUID.randomUUID());
+        }
         return repository.save(country);
     }
 
     @Override
-    public Optional<Country> findById(String id) {
+    public Optional<Country> findById(UUID id) {
         return repository.findById(id);
     }
 

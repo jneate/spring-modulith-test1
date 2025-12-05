@@ -9,6 +9,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,7 +42,7 @@ class CountryControllerTest {
     void createCountryReturns202Accepted() throws Exception {
         // Given
         Country savedCountry = new Country("United Kingdom", "GB");
-        savedCountry.setId("507f1f77bcf86cd799439011");
+        savedCountry.setId(UUID.randomUUID());
         when(countryService.save(any(Country.class))).thenReturn(savedCountry);
 
         // When/Then
@@ -61,7 +63,7 @@ class CountryControllerTest {
     void createCountryCallsServiceSave() throws Exception {
         // Given
         Country savedCountry = new Country("France", "FR");
-        savedCountry.setId("507f1f77bcf86cd799439012");
+        savedCountry.setId(UUID.randomUUID());
         when(countryService.save(any(Country.class))).thenReturn(savedCountry);
 
         // When
@@ -85,7 +87,7 @@ class CountryControllerTest {
     void createCountryDeserializesJsonCorrectly() throws Exception {
         // Given
         Country savedCountry = new Country("Germany", "DE");
-        savedCountry.setId("507f1f77bcf86cd799439013");
+        savedCountry.setId(UUID.randomUUID());
         when(countryService.save(any(Country.class))).thenReturn(savedCountry);
 
         // When
@@ -109,7 +111,7 @@ class CountryControllerTest {
     void createCountryWithSpain() throws Exception {
         // Given
         Country savedCountry = new Country("Spain", "ES");
-        savedCountry.setId("507f1f77bcf86cd799439014");
+        savedCountry.setId(UUID.randomUUID());
         when(countryService.save(any(Country.class))).thenReturn(savedCountry);
 
         // When/Then
@@ -132,7 +134,7 @@ class CountryControllerTest {
     void createCountryWithItaly() throws Exception {
         // Given
         Country savedCountry = new Country("Italy", "IT");
-        savedCountry.setId("507f1f77bcf86cd799439015");
+        savedCountry.setId(UUID.randomUUID());
         when(countryService.save(any(Country.class))).thenReturn(savedCountry);
 
         // When/Then
@@ -155,7 +157,7 @@ class CountryControllerTest {
     void createCountryWithPortugal() throws Exception {
         // Given
         Country savedCountry = new Country("Portugal", "PT");
-        savedCountry.setId("507f1f77bcf86cd799439016");
+        savedCountry.setId(UUID.randomUUID());
         when(countryService.save(any(Country.class))).thenReturn(savedCountry);
 
         // When/Then
@@ -178,7 +180,7 @@ class CountryControllerTest {
     void createCountryAcceptsValidJson() throws Exception {
         // Given
         Country savedCountry = new Country("Belgium", "BE");
-        savedCountry.setId("507f1f77bcf86cd799439017");
+        savedCountry.setId(UUID.randomUUID());
         when(countryService.save(any(Country.class))).thenReturn(savedCountry);
 
         // When

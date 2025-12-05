@@ -8,7 +8,7 @@ The application is organized into the following modules:
 
 - **API Module** (`dev.neate.api`) - REST endpoints for external clients
 - **Domain Module** (`dev.neate.domain`) - Core business logic and data persistence
-- **Validation Module** (`dev.neate.validation`) - Country validation logic (planned)
+- **Validation Module** (`dev.neate.validation`) - Country validation logic
 - **Enrichment Module** (`dev.neate.enrichment`) - Country data enrichment (planned)
 
 ## Features
@@ -16,8 +16,9 @@ The application is organized into the following modules:
 - ✅ REST API for creating countries
 - ✅ MongoDB persistence with Spring Data
 - ✅ Event-driven architecture using Spring Modulith
+- ✅ Automatic country validation via event listeners
 - ✅ Modular design with clear boundaries
-- ✅ Comprehensive test coverage
+- ✅ Comprehensive test coverage (72 tests)
 
 ## Prerequisites
 
@@ -29,13 +30,29 @@ The application is organized into the following modules:
 
 ### 1. Start MongoDB
 
-The application requires MongoDB to be running. Use Docker to start a MongoDB instance:
+The application requires MongoDB configured as a **replica set** to support Spring Modulith's event publication feature (which uses transactions).
 
 ```bash
-docker run -d -p 27017:27017 --name mongodb mongo:7.0
-```
+docker network create mongoCluster
 
-**Note:** For production use, you should configure MongoDB as a replica set to support transactions required by Spring Modulith's event publication feature.
+docker run -d --rm -p 27017:27017 --name mongo1 --network mongoCluster mongo:7.0 mongod --replSet rs0 --bind_ip localhost,mongo1
+
+docker run -d --rm -p 27018:27017 --name mongo2 --network mongoCluster mongo:7.0 mongod --replSet rs0 --bind_ip localhost,mongo2
+
+docker run -d --rm -p 27019:27017 --name mongo3 --network mongoCluster mongo:7.0 mongod --replSet rs0 --bind_ip localhost,mongo3
+
+docker exec -it mongo1 mongosh --eval "rs.initiate({
+ _id: \"rs0\",
+ members: [
+   {_id: 0, host: \"mongo1\"},
+   {_id: 1, host: \"mongo2\"},
+   {_id: 2, host: \"mongo3\"}
+ ]
+})"
+
+# Verify the replica set:
+docker exec -it mongo1 mongosh --eval "rs.status()"
+```
 
 ### 2. Start the Application
 
@@ -81,6 +98,7 @@ The application can be configured via environment variables:
 - `MONGODB_DATABASE` - Database name (default: `country-db`)
 
 Example:
+
 ```bash
 MONGODB_URI=mongodb://localhost:27017 MONGODB_DATABASE=my-db mvn spring-boot:run
 ```
@@ -107,7 +125,7 @@ mvn test -Dtest=CountryControllerTest
 
 **POST** `/countries`
 
-Creates a new country with validation status set to `false`.
+Creates a new country and triggers asynchronous validation.
 
 **Request Body:**
 ```json
@@ -119,8 +137,17 @@ Creates a new country with validation status set to `false`.
 
 **Response:** `202 Accepted` (no body)
 
+**Process Flow:**
+1. Country is created with `validCountry=false`
+2. `CountryCreatedEvent` is published
+3. Validation module listens to the event
+4. Country is validated (name and code must not be null/empty)
+5. If valid: `validCountry` is set to `true` and `CountryValidatedEvent` is published
+6. If invalid: Country remains with `validCountry=false`
+
 **Events Published:**
 - `CountryCreatedEvent` - Contains the ID of the newly created country
+- `CountryValidatedEvent` - Published only if validation passes
 
 ## Development
 
@@ -134,12 +161,15 @@ src/
 │           ├── api/              # REST controllers and DTOs
 │           ├── domain/           # Domain entities and services
 │           │   └── internal/     # Internal implementation details
+│           ├── validation/       # Validation events and logic
+│           │   └── internal/     # Internal validation services
 │           └── Application.java
 └── test/
     └── java/
         └── dev/neate/
             ├── api/              # API layer tests
             ├── domain/           # Domain layer tests
+            ├── validation/       # Validation layer tests
             └── TestcontainersConfiguration.java
 ```
 

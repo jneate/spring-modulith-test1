@@ -13,11 +13,11 @@
 | Application | 1 | 1 | 0 | 0 |
 | Domain | 5 | 5 | 0 | 0 |
 | API | 3 | 3 | 0 | 0 |
-| Validation | 3 | 0 | 0 | 3 |
+| Validation | 3 | 3 | 0 | 0 |
 | Enrichment | 4 | 0 | 0 | 4 |
 | Event | 3 | 0 | 0 | 3 |
 | Testing | 3 | 0 | 0 | 3 |
-| **TOTAL** | **25** | **9** | **0** | **16** |
+| **TOTAL** | **25** | **12** | **0** | **13** |
 
 ---
 
@@ -185,30 +185,51 @@
 
 ## Validation Module (3 tasks)
 
-### 🔒 Task 4.1: Create CountryValidatedEvent
-**Status**: LOCKED  
+### ✅ Task 4.1: Create CountryValidatedEvent
+**Status**: COMPLETED  
 **Dependencies**: None  
-**Started**: -  
-**Completed**: -  
-**Notes**:
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
+**Notes**: 
+- Created CountryValidatedEvent record in dev.neate.validation package
+- Immutable Java record with countryId field
+- Added validation for null/blank country ID
+- Public and accessible from other modules
+- Created comprehensive tests (9 tests)
+- All tests passing
 
 ---
 
-### 🔒 Task 4.2: Create Validation Service
-**Status**: LOCKED  
-**Dependencies**: Task 2.2 (Country entity)  
-**Started**: -  
-**Completed**: -  
-**Notes**:
+### ✅ Task 4.2: Create Validation Service
+**Status**: COMPLETED  
+**Dependencies**: Task 2.2 (Country entity) ✅  
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
+**Notes**: 
+- Created CountryValidationService in dev.neate.validation.internal package
+- Internal service (not exposed to other modules)
+- Validates name and code fields (not null/empty after trim)
+- Does not validate currency, language, or population
+- Created comprehensive tests (15 tests)
+- All tests passing
 
 ---
 
-### 🔒 Task 4.3: Create Validation Event Listener
-**Status**: LOCKED  
-**Dependencies**: Task 3.1, Task 4.1, Task 4.2, Task 2.4  
-**Started**: -  
-**Completed**: -  
-**Notes**:
+### ✅ Task 4.3: Create Validation Event Listener
+**Status**: COMPLETED  
+**Dependencies**: Task 3.1 ✅, Task 4.1 ✅, Task 4.2 ✅, Task 2.4 ✅  
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
+**Notes**: 
+- Created CountryCreatedEventListener in dev.neate.validation.internal package
+- Internal component (not exposed to other modules)
+- Listens to CountryCreatedEvent using @ApplicationModuleListener
+- Validates countries using CountryValidationService
+- Updates validCountry flag to true for valid countries
+- Publishes CountryValidatedEvent for valid countries
+- Logs validation failures for invalid countries
+- Integration tests deferred to later (will be covered in end-to-end tests)
+- Validation Module complete!
 
 ---
 
@@ -386,7 +407,10 @@
 **Date**: 2025-12-05  
 **Note**: API Module complete! Tasks 3.1-3.3 implemented: CountryCreatedEvent, CreateCountryRequest DTO, and CountryController with POST /countries endpoint. Added spring-boot-starter-web dependency. All 48 tests passing. Milestone 3 achieved.
 
+**Date**: 2025-12-05  
+**Note**: Validation Module complete! Tasks 4.1-4.3 implemented: CountryValidatedEvent, CountryValidationService, and CountryCreatedEventListener. Event-driven validation automatically validates countries after creation. All 72 tests passing. Milestone 4 achieved.
+
 ---
 
 *Last Updated*: 2025-12-05  
-*Updated By*: API Module Completion
+*Updated By*: Validation Module Completion

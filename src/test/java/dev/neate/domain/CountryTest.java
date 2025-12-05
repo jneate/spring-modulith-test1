@@ -2,6 +2,8 @@ package dev.neate.domain;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -51,7 +53,8 @@ class CountryTest {
     void canSetAndGetAllFields() {
         // Create entity and set all fields
         Country country = new Country();
-        country.setId("123456789");
+        UUID testId = UUID.randomUUID();
+        country.setId(testId);
         country.setName("France");
         country.setCode("FR");
         country.setCurrency("EUR");
@@ -60,7 +63,7 @@ class CountryTest {
         country.setValidCountry(true);
         
         // Verify all fields
-        assertThat(country.getId()).isEqualTo("123456789");
+        assertThat(country.getId()).isEqualTo(testId);
         assertThat(country.getName()).isEqualTo("France");
         assertThat(country.getCode()).isEqualTo("FR");
         assertThat(country.getCurrency()).isEqualTo("EUR");
@@ -91,7 +94,8 @@ class CountryTest {
     void toStringContainsAllFields() {
         // Create entity with all fields
         Country country = new Country("Spain", "ES");
-        country.setId("abc123");
+        UUID testId = UUID.randomUUID();
+        country.setId(testId);
         country.setCurrency("EUR");
         country.setLanguage("Spanish");
         country.setPopulation("47000000");
@@ -101,7 +105,7 @@ class CountryTest {
         
         // Verify toString contains all field values
         assertThat(toString)
-            .contains("abc123")
+            .contains(testId.toString())
             .contains("Spain")
             .contains("ES")
             .contains("EUR")

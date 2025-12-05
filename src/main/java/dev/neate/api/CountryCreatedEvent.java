@@ -1,5 +1,7 @@
 package dev.neate.api;
 
+import java.util.UUID;
+
 /**
  * Spring Modulith event published when a country is created.
  * 
@@ -10,7 +12,7 @@ package dev.neate.api;
  * The event is immutable and contains only the country ID, allowing
  * listeners to fetch the full country details if needed.
  *
- * @param countryId the ID of the created country
+ * @param countryId the ID of the created country (UUID)
  */
-public record CountryCreatedEvent(String countryId) {
+public record CountryCreatedEvent(UUID countryId) {
 }

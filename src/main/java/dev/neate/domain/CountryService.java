@@ -1,6 +1,7 @@
 package dev.neate.domain;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Public service interface for Country domain operations.
@@ -24,10 +25,10 @@ public interface CountryService {
     /**
      * Find a country by its ID.
      *
-     * @param id the country ID
+     * @param id the country ID (UUID)
      * @return an Optional containing the country if found, empty otherwise
      */
-    Optional<Country> findById(String id);
+    Optional<Country> findById(UUID id);
 
     /**
      * Update an existing country.

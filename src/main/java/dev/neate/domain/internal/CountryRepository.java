@@ -3,21 +3,16 @@ package dev.neate.domain.internal;
 import dev.neate.domain.Country;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.UUID;
+
 /**
- * MongoDB repository for Country entity.
+ * MongoDB repository for Country entities.
  * 
- * This repository is package-private (internal) and not directly accessible
- * from other modules. Access to the repository is provided through the
- * CountryService interface, which is part of the Domain module's public API.
- * 
- * Extends MongoRepository to provide standard CRUD operations:
- * - save(Country): Save or update a country
- * - findById(String): Find a country by ID
- * - findAll(): Find all countries
- * - delete(Country): Delete a country
+ * This repository is internal to the Domain module and not exposed to other modules.
+ * Access to countries should be through the CountryService interface.
  * - count(): Count all countries
  */
-interface CountryRepository extends MongoRepository<Country, String> {
+interface CountryRepository extends MongoRepository<Country, UUID> {
     // Standard CRUD operations are provided by MongoRepository
     // Additional custom query methods can be added here if needed
 }

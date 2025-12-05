@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -81,7 +82,7 @@ class CountryServiceTest {
     @Test
     void findByIdReturnsEmptyForNonExistentId() {
         // Try to find a non-existent country
-        Optional<Country> found = countryService.findById("nonexistent-id");
+        Optional<Country> found = countryService.findById(UUID.randomUUID());
         
         assertThat(found)
             .as("Should return empty for non-existent ID")
@@ -125,7 +126,7 @@ class CountryServiceTest {
     void updateThrowsExceptionForNonExistentCountry() {
         // Create a country with a non-existent ID
         Country country = new Country("Italy", "IT");
-        country.setId("nonexistent-id");
+        country.setId(UUID.randomUUID());
         
         // Try to update non-existent country
         assertThatThrownBy(() -> countryService.update(country))

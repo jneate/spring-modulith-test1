@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,6 +43,7 @@ class CountryRepositoryTest {
     void canSaveCountry() {
         // Create and save a country
         Country country = new Country("United Kingdom", "GB");
+        country.setId(UUID.randomUUID());
         country.setCurrency("GBP");
         country.setLanguage("English");
         country.setPopulation("67000000");
@@ -61,6 +63,7 @@ class CountryRepositoryTest {
     void canFindCountryById() {
         // Save a country
         Country country = new Country("France", "FR");
+        country.setId(UUID.randomUUID());
         Country saved = repository.save(country);
         
         // Find by ID
@@ -79,6 +82,7 @@ class CountryRepositoryTest {
     void canUpdateCountry() {
         // Save a country
         Country country = new Country("Germany", "DE");
+        country.setId(UUID.randomUUID());
         Country saved = repository.save(country);
         
         // Update the country
@@ -98,6 +102,7 @@ class CountryRepositoryTest {
     void canDeleteCountry() {
         // Save a country
         Country country = new Country("Spain", "ES");
+        country.setId(UUID.randomUUID());
         Country saved = repository.save(country);
         
         // Delete the country
@@ -113,7 +118,7 @@ class CountryRepositoryTest {
     @Test
     void findByIdReturnsEmptyForNonExistentId() {
         // Try to find a non-existent country
-        Optional<Country> found = repository.findById("nonexistent-id");
+        Optional<Country> found = repository.findById(UUID.randomUUID());
         
         assertThat(found)
             .as("Should return empty for non-existent ID")
@@ -123,9 +128,17 @@ class CountryRepositoryTest {
     @Test
     void canCountCountries() {
         // Save multiple countries
-        repository.save(new Country("Italy", "IT"));
-        repository.save(new Country("Portugal", "PT"));
-        repository.save(new Country("Greece", "GR"));
+        Country italy = new Country("Italy", "IT");
+        italy.setId(UUID.randomUUID());
+        repository.save(italy);
+        
+        Country portugal = new Country("Portugal", "PT");
+        portugal.setId(UUID.randomUUID());
+        repository.save(portugal);
+        
+        Country greece = new Country("Greece", "GR");
+        greece.setId(UUID.randomUUID());
+        repository.save(greece);
         
         // Count countries
         long count = repository.count();

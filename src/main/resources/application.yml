@@ -2,7 +2,7 @@ spring:
   application:
     name: spring-modulith-test1
   mongodb:
-    uri: ${MONGODB_URI:mongodb://localhost:27017}
+    uri: ${MONGODB_URI:mongodb://localhost:27017/?replicaSet=rs0&directConnection=true}
     database: ${MONGODB_DATABASE:country-db}
 
 # Logging configuration
