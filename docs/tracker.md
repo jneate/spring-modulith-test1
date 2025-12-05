@@ -11,13 +11,13 @@
 | Module | Tasks | Completed | In Progress | Not Started |
 |--------|-------|-----------|-------------|-------------|
 | Application | 1 | 1 | 0 | 0 |
-| Domain | 5 | 0 | 0 | 5 |
+| Domain | 5 | 1 | 0 | 4 |
 | API | 3 | 0 | 0 | 3 |
 | Validation | 3 | 0 | 0 | 3 |
 | Enrichment | 4 | 0 | 0 | 4 |
 | Event | 3 | 0 | 0 | 3 |
 | Testing | 3 | 0 | 0 | 3 |
-| **TOTAL** | **25** | **1** | **0** | **24** |
+| **TOTAL** | **25** | **2** | **0** | **23** |
 
 ---
 
@@ -52,18 +52,27 @@
 
 ## Domain Module (5 tasks)
 
-### ⬜ Task 2.1: Configure MongoDB in Domain Module and Event Publication
-**Status**: NOT STARTED  
+### ✅ Task 2.1: Configure MongoDB in Domain Module and Event Publication
+**Status**: COMPLETED  
 **Dependencies**: Task 1.1 ✅  
-**Started**: -  
-**Completed**: -  
-**Notes**: Merged with former Task 1.2 - includes MongoDB configuration and Spring Modulith event publication setup
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
+**Notes**: 
+- Merged with former Task 1.2 - includes MongoDB configuration and Spring Modulith event publication setup
+- Added MongoDB Spring Boot Starter and Spring Modulith MongoDB starter dependencies
+- Created MongoDBConfiguration class in dev.neate.domain.internal.config
+- Configured MongoDB with environment variable support (MONGODB_URI, MONGODB_DATABASE)
+- Implemented Testcontainers for MongoDB testing (replaced embedded MongoDB)
+- Added Testcontainers BOM for version management
+- Created comprehensive tests for MongoDB and event publication configuration
+- All tests passing (12/12)
+- Event publication registry successfully configured with MongoDB backend
 
 ---
 
-### 🔒 Task 2.2: Create Country Entity
-**Status**: LOCKED  
-**Dependencies**: Task 2.1  
+### ⬜ Task 2.2: Create Country Entity
+**Status**: NOT STARTED  
+**Dependencies**: Task 2.1 ✅  
 **Started**: -  
 **Completed**: -  
 **Notes**:
@@ -320,7 +329,10 @@
 **Date**: 2025-12-05  
 **Note**: Task 1.2 removed and merged into Task 2.1. Spring Modulith event publication configuration now part of MongoDB setup in Domain module. Total tasks reduced from 26 to 25. Application Module milestone complete.
 
+**Date**: 2025-12-05  
+**Note**: Task 2.1 completed. MongoDB and Spring Modulith event publication configured with Testcontainers for testing. All 12 tests passing. Event publication registry successfully using MongoDB backend.
+
 ---
 
 *Last Updated*: 2025-12-05  
-*Updated By*: Task Structure Reorganization
+*Updated By*: Task 2.1 Completion
