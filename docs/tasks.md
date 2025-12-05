@@ -76,17 +76,26 @@ spring-modulith-test1/
 
 ---
 
-### Task 1.2: Configure Spring Modulith Event Publication
-**Description**: Configure Spring Modulith's event publication registry for reliable event processing using MongoDB.
+## Domain Module
+
+### Task 2.1: Configure MongoDB in Domain Module and Event Publication
+**Description**: Set up MongoDB configuration within the Domain module and configure Spring Modulith's event publication registry to use MongoDB.
 
 **Requirements**:
+- Add MongoDB Spring Boot Starter dependency to `pom.xml`
 - Add Spring Modulith event externalization dependency for MongoDB to `pom.xml`
-- Enable Spring Modulith event publication registry
-- Configure event publication to use MongoDB-backed registry
+- Create configuration class in `dev.neate.domain.config` package
+- Configure MongoDB connection via environment variables
+- Default to localhost for local development
+- Enable Spring Modulith event publication registry with MongoDB backend
 - Set up retry configuration for event listeners
 
 **Maven Dependencies**:
 ```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-mongodb</artifactId>
+</dependency>
 <dependency>
     <groupId>org.springframework.modulith</groupId>
     <artifactId>spring-modulith-starter-mongodb</artifactId>
@@ -94,8 +103,10 @@ spring-modulith-test1/
 ```
 
 **Configuration Details**:
+- MongoDB URI: configurable via environment variable `MONGODB_URI`
+- Default: `mongodb://localhost:27017`
+- Database name: configurable via environment variable `MONGODB_DATABASE` (default: `country-db`)
 - Event publication registry will use MongoDB to persist events
-- This requires MongoDB to be configured (handled in Domain module Task 2.1)
 - Events are stored in MongoDB and can be replayed on failure
 
 **Retry Configuration**:
@@ -112,39 +123,6 @@ public void handleEvent(SomeEvent event) {
 }
 ```
 
-**Dependencies**: Task 1.1
-
-**Acceptance Criteria**:
-- Event publication registry is enabled with MongoDB backend
-- Events are persisted to MongoDB and can be retried on failure
-- Retry configuration is properly set
-
----
-
-## Domain Module
-
-### Task 2.1: Configure MongoDB in Domain Module
-**Description**: Set up MongoDB configuration within the Domain module.
-
-**Requirements**:
-- Add MongoDB Spring Boot Starter dependency to `pom.xml`
-- Create configuration class in `dev.neate.domain.config` package
-- Configure MongoDB connection via environment variables
-- Default to localhost for local development
-
-**Maven Dependencies**:
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-data-mongodb</artifactId>
-</dependency>
-```
-
-**Configuration Details**:
-- MongoDB URI: configurable via environment variable `MONGODB_URI`
-- Default: `mongodb://localhost:27017`
-- Database name: configurable via environment variable `MONGODB_DATABASE` (default: `country-db`)
-
 **Application Properties** (in `src/main/resources/application.yml`):
 ```yaml
 spring:
@@ -160,6 +138,9 @@ spring:
 - MongoDB configuration is in Domain module
 - Application connects to MongoDB successfully
 - Configuration is externalized via environment variables
+- Event publication registry is enabled with MongoDB backend
+- Events are persisted to MongoDB and can be retried on failure
+- Retry configuration is properly set
 
 ---
 
@@ -885,7 +866,7 @@ public void handleCountryEnriched(CountryEnrichedEvent event) {
 
 ## Summary
 
-**Total Tasks**: 26 tasks across 7 modules
+**Total Tasks**: 25 tasks across 7 modules
 
 **Build Tool**: Maven
 
@@ -893,7 +874,7 @@ public void handleCountryEnriched(CountryEnrichedEvent event) {
 
 **Key Decisions**:
 - Use Java records for immutable data structures (events, DTOs, value objects)
-- MongoDB configuration managed by Domain module
+- MongoDB configuration managed by Domain module (includes Spring Modulith event publication)
 - Kafka configuration managed by Event module
 - Each module manages its own infrastructure dependencies
 - Spring Modulith BOM for dependency management
@@ -905,8 +886,8 @@ public void handleCountryEnriched(CountryEnrichedEvent event) {
   - **Event Module**: Public - none | Internal - all components
 
 **Recommended Implementation Order**:
-1. Application Module (Tasks 1.1-1.2)
-2. Domain Module (Tasks 2.1-2.5)
+1. Application Module (Task 1.1)
+2. Domain Module (Tasks 2.1-2.5) - includes MongoDB and event publication setup
 3. API Module (Tasks 3.1-3.3)
 4. Validation Module (Tasks 4.1-4.3)
 5. Enrichment Module (Tasks 5.1-5.4)
