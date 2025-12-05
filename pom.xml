@@ -43,10 +43,11 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Spring Boot Starter -->
+        
+        <!-- Spring Boot Web Starter (includes Jackson for JSON, REST support) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
 
         <!-- Spring Modulith Core -->
@@ -67,10 +68,17 @@
             <artifactId>spring-modulith-starter-mongodb</artifactId>
         </dependency>
 
-        <!-- Spring Boot Starter Test -->
+        <!-- Spring Boot WebMvc Test (for @WebMvcTest in Spring Boot 4.0.0) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Spring Data MongoDB Test Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb-test</artifactId>
             <scope>test</scope>
         </dependency>
 

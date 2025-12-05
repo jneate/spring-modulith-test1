@@ -12,12 +12,12 @@
 |--------|-------|-----------|-------------|-------------|
 | Application | 1 | 1 | 0 | 0 |
 | Domain | 5 | 5 | 0 | 0 |
-| API | 3 | 0 | 0 | 3 |
+| API | 3 | 3 | 0 | 0 |
 | Validation | 3 | 0 | 0 | 3 |
 | Enrichment | 4 | 0 | 0 | 4 |
 | Event | 3 | 0 | 0 | 3 |
 | Testing | 3 | 0 | 0 | 3 |
-| **TOTAL** | **25** | **6** | **0** | **19** |
+| **TOTAL** | **25** | **9** | **0** | **16** |
 
 ---
 
@@ -133,30 +133,53 @@
 
 ## API Module (3 tasks)
 
-### 🔒 Task 3.1: Create CountryCreatedEvent
-**Status**: LOCKED  
+### ✅ Task 3.1: Create CountryCreatedEvent
+**Status**: COMPLETED  
 **Dependencies**: None (but recommended after Domain setup)  
-**Started**: -  
-**Completed**: -  
-**Notes**:
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
+**Notes**: 
+- Created CountryCreatedEvent record in dev.neate.api package
+- Immutable Java record with countryId field
+- Public and accessible from other modules
+- Created comprehensive tests (5 tests)
+- All tests passing (36/36)
 
 ---
 
-### 🔒 Task 3.2: Create Country Request DTO
-**Status**: LOCKED  
+### ✅ Task 3.2: Create Country Request DTO
+**Status**: COMPLETED  
 **Dependencies**: None  
-**Started**: -  
-**Completed**: -  
-**Notes**:
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
+**Notes**: 
+- Created CreateCountryRequest record in dev.neate.api package
+- Immutable Java record with name and code fields
+- Public and accessible from other modules
+- Added spring-boot-starter-web dependency for REST API support
+- Created comprehensive tests (5 tests)
+- All tests passing (41/41)
 
 ---
 
-### 🔒 Task 3.3: Create Country Controller
-**Status**: LOCKED  
-**Dependencies**: Task 2.4, Task 3.1, Task 3.2  
-**Started**: -  
-**Completed**: -  
-**Notes**:
+### ✅ Task 3.3: Create Country Controller
+**Status**: COMPLETED  
+**Dependencies**: Task 2.4 ✅, Task 3.1 ✅, Task 3.2 ✅  
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
+**Notes**: 
+- Created CountryController in dev.neate.api package
+- REST endpoint: POST /countries
+- Accepts CreateCountryRequest JSON
+- Saves country via CountryService
+- Publishes CountryCreatedEvent with generated ID
+- Returns 202 Accepted (no body)
+- Created web layer slice tests using @WebMvcTest (7 tests)
+- Updated to Spring Boot 4.0.0 imports:
+  - @WebMvcTest from org.springframework.boot.webmvc.test.autoconfigure
+  - @MockitoBean from org.springframework.test.context.bean.override.mockito
+- All tests passing
+- API Module complete!
 
 ---
 
@@ -334,7 +357,7 @@
 
 - [x] **Milestone 1**: Application Module Complete (Task 1.1 ✅)
 - [x] **Milestone 2**: Domain Module Complete (Tasks 2.1 ✅, 2.2 ✅, 2.3 ✅, 2.4 ✅, 2.5 ✅)
-- [ ] **Milestone 3**: API Module Complete (Tasks 3.1-3.3)
+- [x] **Milestone 3**: API Module Complete (Tasks 3.1 ✅, 3.2 ✅, 3.3 ✅)
 - [ ] **Milestone 4**: Validation Module Complete (Tasks 4.1-4.3)
 - [ ] **Milestone 5**: Enrichment Module Complete (Tasks 5.1-5.4)
 - [ ] **Milestone 6**: Event Module Complete (Tasks 6.1-6.3)
@@ -360,7 +383,10 @@
 **Date**: 2025-12-05  
 **Note**: Domain Module complete! Tasks 2.2-2.5 implemented: Country entity, CountryRepository, CountryService interface and implementation. All 31 tests passing. Proper encapsulation with internal packages. Milestone 2 achieved.
 
+**Date**: 2025-12-05  
+**Note**: API Module complete! Tasks 3.1-3.3 implemented: CountryCreatedEvent, CreateCountryRequest DTO, and CountryController with POST /countries endpoint. Added spring-boot-starter-web dependency. All 48 tests passing. Milestone 3 achieved.
+
 ---
 
 *Last Updated*: 2025-12-05  
-*Updated By*: Domain Module Completion
+*Updated By*: API Module Completion
