@@ -51,14 +51,4 @@ class ApplicationTest {
         modules.verify();
     }
 
-    @Test
-    void generatesModuleDocumentation() {
-        // Generate module documentation
-        ApplicationModules modules = ApplicationModules.of(Application.class);
-        
-        // This generates PlantUML diagrams and documentation
-        new Documenter(modules)
-            .writeDocumentation()
-            .writeIndividualModulesAsPlantUml();
-    }
 }

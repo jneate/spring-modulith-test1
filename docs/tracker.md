@@ -14,10 +14,10 @@
 | Domain | 5 | 5 | 0 | 0 |
 | API | 3 | 3 | 0 | 0 |
 | Validation | 3 | 3 | 0 | 0 |
-| Enrichment | 4 | 0 | 0 | 4 |
+| Enrichment | 4 | 4 | 0 | 0 |
 | Event | 3 | 0 | 0 | 3 |
 | Testing | 3 | 0 | 0 | 3 |
-| **TOTAL** | **25** | **12** | **0** | **13** |
+| **TOTAL** | **25** | **16** | **0** | **9** |
 
 ---
 
@@ -235,39 +235,67 @@
 
 ## Enrichment Module (4 tasks)
 
-### 🔒 Task 5.1: Create CountryEnrichedEvent
-**Status**: LOCKED  
+### ✅ Task 5.1: Create CountryEnrichedEvent
+**Status**: COMPLETED  
 **Dependencies**: None  
-**Started**: -  
-**Completed**: -  
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
 **Notes**:
+- Created CountryEnrichedEvent as Java record with UUID countryId
+- Event is immutable and public (accessible to other modules)
+- Includes validation for null countryId
+- 7 comprehensive tests covering all scenarios
+- All tests passing
 
 ---
 
-### 🔒 Task 5.2: Create RestCountries API Client
-**Status**: LOCKED  
+### ✅ Task 5.2: Create RestCountries API Client
+**Status**: COMPLETED  
 **Dependencies**: None  
-**Started**: -  
-**Completed**: -  
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
 **Notes**:
+- Created RestCountriesClient using RestClient (Spring Web)
+- Fetches data from https://restcountries.com/v3.1/alpha/{code}
+- Extracts population, first currency code, and first language name
+- Uses Map-based JSON parsing (no Jackson dependency needed)
+- Proper error handling with EnrichmentException
+- 10 comprehensive tests covering success and error scenarios
+- All tests passing
 
 ---
 
-### 🔒 Task 5.3: Create Enrichment Service
-**Status**: LOCKED  
+### ✅ Task 5.3: Create Enrichment Service
+**Status**: COMPLETED  
 **Dependencies**: Task 5.2, Task 2.4  
-**Started**: -  
-**Completed**: -  
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
 **Notes**:
+- Created CountryEnrichmentService orchestrating enrichment process
+- Fetches data from RestCountriesClient
+- Updates country entity with population, currency, and language
+- Saves enriched country via CountryService
+- Follows Single Responsibility Principle (SRP)
+- 8 comprehensive tests with mocked dependencies
+- All tests passing
 
 ---
 
-### 🔒 Task 5.4: Create Enrichment Event Listener
-**Status**: LOCKED  
+### ✅ Task 5.4: Create Enrichment Event Listener
+**Status**: COMPLETED  
 **Dependencies**: Task 4.1, Task 5.1, Task 5.3, Task 2.4  
-**Started**: -  
-**Completed**: -  
+**Started**: 2025-12-05  
+**Completed**: 2025-12-05  
 **Notes**:
+- Created CountryValidatedEventListener with @ApplicationModuleListener
+- Listens to CountryValidatedEvent from Validation module
+- Only enriches valid countries (validCountry == true)
+- Calls CountryEnrichmentService for enrichment
+- Publishes CountryEnrichedEvent on success
+- Retry support via Spring Modulith (3 attempts, exponential backoff)
+- Propagates EnrichmentException for retry mechanism
+- 8 comprehensive tests covering all scenarios
+- All tests passing
 
 ---
 
@@ -410,7 +438,10 @@
 **Date**: 2025-12-05  
 **Note**: Validation Module complete! Tasks 4.1-4.3 implemented: CountryValidatedEvent, CountryValidationService, and CountryCreatedEventListener. Event-driven validation automatically validates countries after creation. All 72 tests passing. Milestone 4 achieved.
 
+**Date**: 2025-12-05  
+**Note**: Enrichment Module complete! Tasks 5.1-5.4 implemented: CountryEnrichedEvent, RestCountriesClient, CountryEnrichmentService, and CountryValidatedEventListener. Event-driven enrichment fetches data from RestCountries API and enriches valid countries with population, currency, and language. Includes retry support via Spring Modulith. All 100 tests passing. Milestone 5 achieved.
+
 ---
 
 *Last Updated*: 2025-12-05  
-*Updated By*: Validation Module Completion
+*Updated By*: Enrichment Module Completion

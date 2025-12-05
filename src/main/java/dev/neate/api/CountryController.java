@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * REST controller for country operations.
@@ -48,6 +49,7 @@ public class CountryController {
      * @return 202 Accepted response
      */
     @PostMapping
+    @Transactional // Important otherwise events won't be consumed
     public ResponseEntity<Void> createCountry(@RequestBody CreateCountryRequest request) {
         // Create country entity
         Country country = new Country(request.name(), request.code());
