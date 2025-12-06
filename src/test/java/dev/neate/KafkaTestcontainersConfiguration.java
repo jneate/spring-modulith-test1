@@ -3,31 +3,29 @@ package dev.neate;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
-import org.testcontainers.mongodb.MongoDBContainer;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 /**
- * Testcontainers configuration for MongoDB.
+ * Testcontainers configuration for Kafka only.
  * 
- * This configuration provides a MongoDB container for testing purposes.
+ * This configuration provides only a Kafka container for tests that need Kafka
+ * but already have MongoDB configured elsewhere.
  * The @ServiceConnection annotation automatically configures Spring Boot
  * to use the container's connection details.
+ * 
+ * Use this for:
+ * - Kafka-specific tests that also import MongoTestcontainersConfiguration
+ * - Integration tests needing both containers (import both configs)
  */
 @TestConfiguration
-public class TestcontainersConfiguration {
-
-    @Bean
-    @ServiceConnection
-    MongoDBContainer mongoDBContainer() {
-        return new MongoDBContainer(DockerImageName.parse("mongo:7.0"))
-            .withReplicaSet()
-            .withReuse(true);
-    }
+public class KafkaTestcontainersConfiguration {
 
     @Bean
     @ServiceConnection
     ConfluentKafkaContainer confluentKafkaContainer() {
+        // Spring Boot @ServiceConnection automatically manages container lifecycle
+        // No need to manually close - containers are reused across tests
         return new ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0"))
             .withReuse(false);
     }

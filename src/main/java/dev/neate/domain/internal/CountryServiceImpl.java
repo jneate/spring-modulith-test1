@@ -44,18 +44,4 @@ class CountryServiceImpl implements CountryService {
     public Optional<Country> findById(UUID id) {
         return repository.findById(id);
     }
-
-    @Override
-    public Country update(Country country) {
-        if (country.getId() == null) {
-            throw new IllegalArgumentException("Country ID cannot be null for update operation");
-        }
-        
-        // Verify the country exists
-        if (!repository.existsById(country.getId())) {
-            throw new IllegalArgumentException("Country with ID " + country.getId() + " does not exist");
-        }
-        
-        return repository.save(country);
-    }
 }

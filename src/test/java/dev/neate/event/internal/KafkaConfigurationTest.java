@@ -1,15 +1,12 @@
 package dev.neate.event.internal;
 
-import dev.neate.TestcontainersConfiguration;
+import dev.neate.KafkaTestcontainersConfiguration;
+import dev.neate.MongoTestcontainersConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.containers.MongoDBContainer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -21,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - Connection to Kafka can be established
  */
 @SpringBootTest
-@Import(TestcontainersConfiguration.class)
+@Import({MongoTestcontainersConfiguration.class, KafkaTestcontainersConfiguration.class})
 class KafkaConfigurationTest {
 
     @Autowired

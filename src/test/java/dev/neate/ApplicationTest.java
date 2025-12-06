@@ -4,8 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.modulith.core.ApplicationModules;
-import org.springframework.modulith.docs.Documenter;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -17,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * - Module structure follows Spring Modulith conventions
  */
 @SpringBootTest
-@Import(TestcontainersConfiguration.class)
+@Import(MongoTestcontainersConfiguration.class)
 class ApplicationTest {
 
     @Test

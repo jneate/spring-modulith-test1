@@ -31,15 +31,34 @@ The application is organized into the following modules:
 
 ## Running the Application Locally
 
-### 1. Start backing services
+### 1. Configure hosts file for MongoDB replica set
 
-> Note: The application requires MongoDB configured as a **replica set** to support Spring Modulith's event publication feature (which uses transactions). To support this I had to add the following to my hosts file in order for the application to resolve the hostnames of the MongoDB replica set, you can also do this via assigning each container a static IP address. See https://www.mongodb.com/community/forums/t/mongodb-replica-docker-cannot-connect-on-replica-only-individual-connection/12802/5 for more information.
+> **Important:** The application requires MongoDB configured as a **replica set** to support Spring Modulith's event publication feature (which uses transactions). The Spring Boot application runs on your host machine but needs to connect to MongoDB containers using hostnames that resolve to specific IP addresses.
+
+**Add the following entries to your hosts file:**
+
+**Windows:** `C:\Windows\System32\drivers\etc\hosts`
+**macOS/Linux:** `/etc/hosts`
 
 ```text
+# MongoDB replica set for Spring Modulith test application
 127.0.10.1 mongo1
 127.0.10.2 mongo2
 127.0.10.3 mongo3
 ```
+
+**Why this is needed:**
+- Docker containers are bound to specific IP addresses (`127.0.10.1`, `127.0.10.2`, `127.0.10.3`)
+- The application configuration uses hostnames (`mongo1`, `mongo2`, `mongo3`) for the replica set
+- Your hosts file maps these hostnames to the container IP addresses
+- This allows the Spring Boot app to resolve MongoDB replica set members correctly
+
+**Alternative approaches:**
+1. Run the Spring Boot application inside Docker on the same network
+2. Use localhost ports (27017, 27018, 27019) instead of hostnames
+3. Assign static IPs to containers and use IP addresses directly in configuration
+
+### 2. Start backing services
 
 To bring up the application dependencies:
 
@@ -49,7 +68,7 @@ docker-compose up -d
 
 **Note:** Tests use Testcontainers which automatically start Kafka and Mongo, so this is only needed for local development.
 
-### 2. Start the Application
+### 3. Start the Application
 
 Run the Spring Boot application using Maven:
 
@@ -59,7 +78,7 @@ mvn spring-boot:run
 
 The application will start on `http://localhost:8080`
 
-### 3. Test the API
+### 4. Test the API
 
 Create a country using the REST API:
 
@@ -77,7 +96,7 @@ curl -X POST http://localhost:8080/countries \
 
 Expected response: `202 Accepted`
 
-### 4. Verify Data in MongoDB
+### 5. Verify Data in MongoDB
 
 Check the saved countries in MongoDB:
 

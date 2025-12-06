@@ -29,15 +29,4 @@ public interface CountryService {
      * @return an Optional containing the country if found, empty otherwise
      */
     Optional<Country> findById(UUID id);
-
-    /**
-     * Update an existing country.
-     * 
-     * This method validates that the country exists before updating.
-     *
-     * @param country the country to update (must have a valid ID)
-     * @return the updated country
-     * @throws IllegalArgumentException if the country doesn't exist
-     */
-    Country update(Country country);
 }

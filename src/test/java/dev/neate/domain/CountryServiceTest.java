@@ -1,19 +1,17 @@
 package dev.neate.domain;
 
-import dev.neate.TestcontainersConfiguration;
+import dev.neate.MongoTestcontainersConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Test class for CountryService.
@@ -25,10 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * - Edge cases are handled appropriately
  */
 @SpringBootTest
-@Import(TestcontainersConfiguration.class)
-@TestPropertySource(properties = {
-    "spring.data.mongodb.database=test-country-service-db"
-})
+@Import(MongoTestcontainersConfiguration.class)
 class CountryServiceTest {
 
     @Autowired
@@ -87,51 +82,6 @@ class CountryServiceTest {
         assertThat(found)
             .as("Should return empty for non-existent ID")
             .isEmpty();
-    }
-
-    @Test
-    void canUpdateExistingCountry() {
-        // Save a country
-        Country country = new Country("Germany", "DE");
-        Country saved = countryService.save(country);
-        
-        // Update the country
-        saved.setCurrency("EUR");
-        saved.setLanguage("German");
-        saved.setPopulation("83000000");
-        saved.setValidCountry(true);
-        
-        Country updated = countryService.update(saved);
-        
-        // Verify the update
-        assertThat(updated.getId()).isEqualTo(saved.getId());
-        assertThat(updated.getCurrency()).isEqualTo("EUR");
-        assertThat(updated.getLanguage()).isEqualTo("German");
-        assertThat(updated.getPopulation()).isEqualTo("83000000");
-        assertThat(updated.getValidCountry()).isTrue();
-    }
-
-    @Test
-    void updateThrowsExceptionForNullId() {
-        // Create a country without ID
-        Country country = new Country("Spain", "ES");
-        
-        // Try to update without ID
-        assertThatThrownBy(() -> countryService.update(country))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Country ID cannot be null");
-    }
-
-    @Test
-    void updateThrowsExceptionForNonExistentCountry() {
-        // Create a country with a non-existent ID
-        Country country = new Country("Italy", "IT");
-        country.setId(UUID.randomUUID());
-        
-        // Try to update non-existent country
-        assertThatThrownBy(() -> countryService.update(country))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("does not exist");
     }
 
     @Test
