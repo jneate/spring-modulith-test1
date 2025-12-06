@@ -15,9 +15,9 @@
 | API | 3 | 3 | 0 | 0 |
 | Validation | 3 | 3 | 0 | 0 |
 | Enrichment | 4 | 4 | 0 | 0 |
-| Event | 3 | 0 | 0 | 3 |
+| Event | 3 | 3 | 0 | 0 |
 | Testing | 3 | 0 | 0 | 3 |
-| **TOTAL** | **25** | **16** | **0** | **9** |
+| **TOTAL** | **25** | **19** | **0** | **6** |
 
 ---
 
@@ -301,30 +301,54 @@
 
 ## Event Module (3 tasks)
 
-### 🔒 Task 6.1: Configure Kafka in Event Module
-**Status**: LOCKED  
+### ✅ Task 6.1: Configure Kafka in Event Module
+**Status**: COMPLETED  
 **Dependencies**: Task 1.1  
-**Started**: -  
-**Completed**: -  
+**Started**: 2025-12-06  
+**Completed**: 2025-12-06  
 **Notes**:
+- Added spring-boot-starter-kafka dependency
+- Added Kafka testcontainers dependencies (kafka, spring-kafka-test)
+- Created KafkaConfiguration with @EnableKafka
+- Configured Kafka in application.yml (bootstrap-servers, serializers)
+- Environment variable support: KAFKA_BOOTSTRAP_SERVERS (default: localhost:9092)
+- JSON serialization for Kafka messages
+- 3 comprehensive tests with Kafka testcontainers
+- All tests passing
 
 ---
 
-### 🔒 Task 6.2: Create Kafka Event Producer
-**Status**: LOCKED  
+### ✅ Task 6.2: Create Kafka Event Producer
+**Status**: COMPLETED  
 **Dependencies**: Task 6.1  
-**Started**: -  
-**Completed**: -  
+**Started**: 2025-12-06  
+**Completed**: 2025-12-06  
 **Notes**:
+- Created CountryKafkaProducer in dev.neate.event.internal
+- Sends country events to 'country-events' Kafka topic
+- Uses country ID as message key for partitioning
+- JSON serialization of complete country object
+- Synchronous send with exception propagation for retry
+- Proper error handling with KafkaException
+- 7 comprehensive tests covering success and error scenarios
+- All tests passing
 
 ---
 
-### 🔒 Task 6.3: Create Event Listener for Country Enriched
-**Status**: LOCKED  
+### ✅ Task 6.3: Create Event Listener for Country Enriched
+**Status**: COMPLETED  
 **Dependencies**: Task 5.1, Task 6.2, Task 2.4  
-**Started**: -  
-**Completed**: -  
+**Started**: 2025-12-06  
+**Completed**: 2025-12-06  
 **Notes**:
+- Created CountryEnrichedEventListener with @ApplicationModuleListener
+- Listens to CountryEnrichedEvent from Enrichment module
+- Fetches enriched country from domain
+- Sends country data to Kafka via CountryKafkaProducer
+- Retry support via Spring Modulith (3 attempts, exponential backoff)
+- Propagates exceptions for retry mechanism
+- 8 comprehensive tests covering all scenarios
+- All tests passing
 
 ---
 
@@ -441,7 +465,10 @@
 **Date**: 2025-12-05  
 **Note**: Enrichment Module complete! Tasks 5.1-5.4 implemented: CountryEnrichedEvent, RestCountriesClient, CountryEnrichmentService, and CountryValidatedEventListener. Event-driven enrichment fetches data from RestCountries API and enriches valid countries with population, currency, and language. Includes retry support via Spring Modulith. All 100 tests passing. Milestone 5 achieved.
 
+**Date**: 2025-12-06  
+**Note**: Event Module complete! Tasks 6.1-6.3 implemented: Kafka configuration, CountryKafkaProducer, and CountryEnrichedEventListener. Event-driven Kafka production sends enriched country data to 'country-events' topic. Includes Kafka testcontainers for testing. All 118 tests passing (18 new Event module tests). Milestone 6 achieved. README updated with Kafka setup instructions.
+
 ---
 
-*Last Updated*: 2025-12-05  
-*Updated By*: Enrichment Module Completion
+*Last Updated*: 2025-12-06  
+*Updated By*: Event Module Completion

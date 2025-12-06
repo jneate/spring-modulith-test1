@@ -9,7 +9,8 @@ The application is organized into the following modules:
 - **API Module** (`dev.neate.api`) - REST endpoints for external clients
 - **Domain Module** (`dev.neate.domain`) - Core business logic and data persistence
 - **Validation Module** (`dev.neate.validation`) - Country validation logic
-- **Enrichment Module** (`dev.neate.enrichment`) - Country data enrichment (planned)
+- **Enrichment Module** (`dev.neate.enrichment`) - Country data enrichment via external APIs
+- **Event Module** (`dev.neate.event`) - Kafka event production
 
 ## Features
 
@@ -17,42 +18,36 @@ The application is organized into the following modules:
 - ✅ MongoDB persistence with Spring Data
 - ✅ Event-driven architecture using Spring Modulith
 - ✅ Automatic country validation via event listeners
+- ✅ Country data enrichment from RestCountries API
+- ✅ Kafka event production for enriched countries
 - ✅ Modular design with clear boundaries
-- ✅ Comprehensive test coverage (72 tests)
+- ✅ Comprehensive test coverage (118 tests)
 
 ## Prerequisites
 
 - Java 17 or higher
 - Maven 3.6+
-- Docker (for running MongoDB)
+- Docker (for running MongoDB and Kafka)
 
 ## Running the Application Locally
 
-### 1. Start MongoDB
+### 1. Start backing services
 
-The application requires MongoDB configured as a **replica set** to support Spring Modulith's event publication feature (which uses transactions).
+> Note: The application requires MongoDB configured as a **replica set** to support Spring Modulith's event publication feature (which uses transactions). To support this I had to add the following to my hosts file in order for the application to resolve the hostnames of the MongoDB replica set, you can also do this via assigning each container a static IP address. See https://www.mongodb.com/community/forums/t/mongodb-replica-docker-cannot-connect-on-replica-only-individual-connection/12802/5 for more information.
 
-```bash
-docker network create mongoCluster
-
-docker run -d --rm -p 27017:27017 --name mongo1 --network mongoCluster mongo:7.0 mongod --replSet rs0 --bind_ip localhost,mongo1
-
-docker run -d --rm -p 27018:27017 --name mongo2 --network mongoCluster mongo:7.0 mongod --replSet rs0 --bind_ip localhost,mongo2
-
-docker run -d --rm -p 27019:27017 --name mongo3 --network mongoCluster mongo:7.0 mongod --replSet rs0 --bind_ip localhost,mongo3
-
-docker exec -it mongo1 mongosh --eval "rs.initiate({
- _id: \"rs0\",
- members: [
-   {_id: 0, host: \"mongo1\"},
-   {_id: 1, host: \"mongo2\"},
-   {_id: 2, host: \"mongo3\"}
- ]
-})"
-
-# Verify the replica set:
-docker exec -it mongo1 mongosh --eval "rs.status()"
+```text
+127.0.10.1 mongo1
+127.0.10.2 mongo2
+127.0.10.3 mongo3
 ```
+
+To bring up the application dependencies:
+
+```sh
+docker-compose up -d
+```
+
+**Note:** Tests use Testcontainers which automatically start Kafka and Mongo, so this is only needed for local development.
 
 ### 2. Start the Application
 
@@ -94,13 +89,14 @@ docker exec mongodb mongosh country-db --quiet --eval "db.countries.find().prett
 
 The application can be configured via environment variables:
 
-- `MONGODB_URI` - MongoDB connection URI (default: `mongodb://localhost:27017`)
+- `MONGODB_URI` - MongoDB connection URI (default: `mongodb://localhost:27017/?replicaSet=rs0`)
 - `MONGODB_DATABASE` - Database name (default: `country-db`)
+- `KAFKA_BOOTSTRAP_SERVERS` - Kafka bootstrap servers (default: `localhost:9092`)
 
 Example:
 
 ```bash
-MONGODB_URI=mongodb://localhost:27017 MONGODB_DATABASE=my-db mvn spring-boot:run
+MONGODB_URI=mongodb://localhost:27017/?replicaSet=rs0 KAFKA_BOOTSTRAP_SERVERS=localhost:9092 mvn spring-boot:run
 ```
 
 ## Running Tests
@@ -117,7 +113,7 @@ Run a specific test class:
 mvn test -Dtest=CountryControllerTest
 ```
 
-**Note:** Tests use Testcontainers to automatically start MongoDB, so Docker must be running.
+**Note:** Tests use Testcontainers to automatically start MongoDB and Kafka, so Docker must be running.
 
 ## API Endpoints
 
@@ -143,11 +139,19 @@ Creates a new country and triggers asynchronous validation.
 3. Validation module listens to the event
 4. Country is validated (name and code must not be null/empty)
 5. If valid: `validCountry` is set to `true` and `CountryValidatedEvent` is published
-6. If invalid: Country remains with `validCountry=false`
+6. Enrichment module listens to `CountryValidatedEvent`
+7. Country data is enriched from RestCountries API (population, currency, language)
+8. `CountryEnrichedEvent` is published
+9. Event module listens to `CountryEnrichedEvent`
+10. Enriched country data is sent to Kafka topic `country-events`
 
 **Events Published:**
 - `CountryCreatedEvent` - Contains the ID of the newly created country
 - `CountryValidatedEvent` - Published only if validation passes
+- `CountryEnrichedEvent` - Published after successful enrichment
+
+**Kafka Topics:**
+- `country-events` - Enriched country data in JSON format
 
 ## Development
 
@@ -163,6 +167,10 @@ src/
 │           │   └── internal/     # Internal implementation details
 │           ├── validation/       # Validation events and logic
 │           │   └── internal/     # Internal validation services
+│           ├── enrichment/       # Enrichment events and logic
+│           │   └── internal/     # Internal enrichment services
+│           ├── event/            # Kafka event production
+│           │   └── internal/     # Internal Kafka producers
 │           └── Application.java
 └── test/
     └── java/
@@ -170,6 +178,8 @@ src/
             ├── api/              # API layer tests
             ├── domain/           # Domain layer tests
             ├── validation/       # Validation layer tests
+            ├── enrichment/       # Enrichment layer tests
+            ├── event/            # Event layer tests
             └── TestcontainersConfiguration.java
 ```
 
@@ -184,10 +194,16 @@ This project uses Spring Boot 4.0.0 which has updated package structures:
 ## Stopping the Application
 
 1. Stop the Spring Boot application: `Ctrl+C`
-2. Stop and remove the MongoDB container:
+2. Stop and remove the containers:
    ```bash
-   docker stop mongodb
-   docker rm mongodb
+   # Stop Kafka
+   docker stop kafka
+   
+   # Stop MongoDB replica set
+   docker stop mongo1 mongo2 mongo3
+   
+   # Remove network
+   docker network rm mongoCluster
    ```
 
 ## Documentation

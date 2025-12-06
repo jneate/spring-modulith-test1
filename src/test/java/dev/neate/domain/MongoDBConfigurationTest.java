@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.TestPropertySource;
-
+import org.testcontainers.containers.MongoDBContainer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**

@@ -1,0 +1,121 @@
+services:
+  mongo1:
+    image: mongo:7.0
+    container_name: mongo1
+    ports:
+      - "127.0.10.1:27017:27017"
+    networks:
+      - application
+    command: mongod --replSet rs0 --bind_ip_all --port 27017
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  mongo2:
+    image: mongo:7.0
+    container_name: mongo2
+    ports:
+      - "127.0.10.2:27017:27017"
+    networks:
+      - application
+    command: mongod --replSet rs0 --bind_ip_all --port 27017
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  mongo3:
+    image: mongo:7.0
+    container_name: mongo3
+    ports:
+      - "127.0.10.3:27017:27017"
+    networks:
+      - application
+    command: mongod --replSet rs0 --bind_ip_all --port 27017
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    networks:
+      - application
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://localhost:9093,INTERNAL://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kafka-ui:
+    image: obsidiandynamics/kafdrop:latest
+    container_name: kafka-ui
+    ports:
+      - "9000:9000"
+    networks:
+      - application
+    environment:
+      KAFKA_BROKERCONNECT: kafka:29092
+      SERVER_PORT: 9000
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  mongo-setup:
+    image: mongo:7.0
+    container_name: mongo-setup
+    networks:
+      - application
+    depends_on:
+      mongo1:
+        condition: service_healthy
+      mongo2:
+        condition: service_healthy
+      mongo3:
+        condition: service_healthy
+    command: >
+      mongosh --host mongo1:27017 --eval "
+        rs.initiate({
+          _id: 'rs0',
+          members: [
+            {_id: 0, host: 'mongo1:27017'},
+            {_id: 1, host: 'mongo2:27017'},
+            {_id: 2, host: 'mongo3:27017'}
+          ]
+        });
+        while (true) {
+          var status = rs.status();
+          if (status.ok && status.members.length > 0) {
+            print('Replica set initialized successfully');
+            break;
+          }
+          print('Waiting for replica set to initialize...');
+          sleep(1000);
+        }
+      "
+    restart: "no"
+
+networks:
+  application:
+    driver: bridge

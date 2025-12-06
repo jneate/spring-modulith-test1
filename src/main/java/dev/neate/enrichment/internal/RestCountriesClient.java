@@ -2,13 +2,13 @@ package dev.neate.enrichment.internal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Client for calling the RestCountries API.
@@ -59,36 +59,27 @@ class RestCountriesClient {
      * @return enrichment data containing population, currency, and language
      * @throws EnrichmentException if the API call fails or response cannot be parsed
      */
-    @SuppressWarnings("unchecked")
     public EnrichmentData fetchCountryData(String countryCode) throws EnrichmentException {
         log.debug("Fetching country data for code: {}", countryCode);
         
         try {
-            // Call API - returns a list with one map
-            List<Map<String, Object>> response = restClient.get()
+            // Call API - returns a list with one country object
+            List<RestCountriesResponse> response = restClient.get()
                 .uri("/alpha/{code}", countryCode)
                 .retrieve()
-                .body(List.class);
+                .body(new ParameterizedTypeReference<List<RestCountriesResponse>>() {});
             
             if (response == null || response.isEmpty()) {
                 throw new EnrichmentException("No data returned for country code: " + countryCode);
             }
             
-            Map<String, Object> countryData = response.get(0);
-            
-            // Extract population
-            String population = extractPopulation(countryData);
-            
-            // Extract first currency code
-            String currency = extractFirstCurrency(countryData);
-            
-            // Extract first language name
-            String language = extractFirstLanguage(countryData);
+            RestCountriesResponse countryData = response.get(0);
+            EnrichmentData enrichmentData = countryData.toEnrichmentData();
             
             log.debug("Successfully fetched data for {}: population={}, currency={}, language={}", 
-                countryCode, population, currency, language);
+                countryCode, enrichmentData.population(), enrichmentData.currency(), enrichmentData.language());
             
-            return new EnrichmentData(population, currency, language);
+            return enrichmentData;
             
         } catch (EnrichmentException e) {
             throw e;
@@ -98,53 +89,4 @@ class RestCountriesClient {
         }
     }
 
-    /**
-     * Extracts population from the country data.
-     */
-    @SuppressWarnings("unchecked")
-    private String extractPopulation(Map<String, Object> countryData) throws EnrichmentException {
-        Object populationObj = countryData.get("population");
-        if (populationObj == null) {
-            throw new EnrichmentException("Population data not found");
-        }
-        return String.valueOf(populationObj);
-    }
-
-    /**
-     * Extracts the first currency code from the currencies object.
-     * Example: {"GBP": {"symbol": "£", "name": "British pound"}} -> "GBP"
-     */
-    @SuppressWarnings("unchecked")
-    private String extractFirstCurrency(Map<String, Object> countryData) throws EnrichmentException {
-        Object currenciesObj = countryData.get("currencies");
-        if (currenciesObj == null || !(currenciesObj instanceof Map)) {
-            throw new EnrichmentException("Currencies data not found");
-        }
-        
-        Map<String, Object> currencies = (Map<String, Object>) currenciesObj;
-        if (currencies.isEmpty()) {
-            throw new EnrichmentException("No currency codes found");
-        }
-        
-        return currencies.keySet().iterator().next();
-    }
-
-    /**
-     * Extracts the first language name from the languages object.
-     * Example: {"eng": "English"} -> "English"
-     */
-    @SuppressWarnings("unchecked")
-    private String extractFirstLanguage(Map<String, Object> countryData) throws EnrichmentException {
-        Object languagesObj = countryData.get("languages");
-        if (languagesObj == null || !(languagesObj instanceof Map)) {
-            throw new EnrichmentException("Languages data not found");
-        }
-        
-        Map<String, Object> languages = (Map<String, Object>) languagesObj;
-        if (languages.isEmpty()) {
-            throw new EnrichmentException("No languages found");
-        }
-        
-        return String.valueOf(languages.values().iterator().next());
-    }
 }

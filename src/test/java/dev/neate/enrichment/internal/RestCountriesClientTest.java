@@ -2,9 +2,9 @@ package dev.neate.enrichment.internal;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.client.RestClient;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,13 +52,14 @@ class RestCountriesClientTest {
     @Test
     void canFetchCountryData() throws Exception {
         // Given
-        Map<String, Object> countryData = new HashMap<>();
-        countryData.put("population", 67000000);
-        countryData.put("currencies", Map.of("GBP", Map.of("symbol", "£", "name", "British pound")));
-        countryData.put("languages", Map.of("eng", "English"));
+        RestCountriesResponse countryResponse = new RestCountriesResponse(
+            67000000,
+            Map.of("GBP", new CurrencyInfo("£", "British pound")),
+            Map.of("eng", "English")
+        );
         
-        List<Map<String, Object>> response = List.of(countryData);
-        when(mockResponseSpec.body(List.class)).thenReturn(response);
+        List<RestCountriesResponse> response = List.of(countryResponse);
+        when(mockResponseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(response);
 
         // When
         EnrichmentData data = client.fetchCountryData("GB");
@@ -72,13 +74,14 @@ class RestCountriesClientTest {
     @Test
     void convertsPopulationNumberToString() throws Exception {
         // Given
-        Map<String, Object> countryData = new HashMap<>();
-        countryData.put("population", 83000000);
-        countryData.put("currencies", Map.of("EUR", Map.of("symbol", "€", "name", "Euro")));
-        countryData.put("languages", Map.of("deu", "German"));
+        RestCountriesResponse countryResponse = new RestCountriesResponse(
+            83000000,
+            Map.of("EUR", new CurrencyInfo("€", "Euro")),
+            Map.of("deu", "German")
+        );
         
-        List<Map<String, Object>> response = List.of(countryData);
-        when(mockResponseSpec.body(List.class)).thenReturn(response);
+        List<RestCountriesResponse> response = List.of(countryResponse);
+        when(mockResponseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(response);
 
         // When
         EnrichmentData data = client.fetchCountryData("DE");
@@ -91,7 +94,7 @@ class RestCountriesClientTest {
     @Test
     void throwsExceptionWhenResponseIsNull() {
         // Given
-        when(mockResponseSpec.body(List.class)).thenReturn(null);
+        when(mockResponseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(null);
 
         // When/Then
         assertThatThrownBy(() -> client.fetchCountryData("XX"))
@@ -102,7 +105,7 @@ class RestCountriesClientTest {
     @Test
     void throwsExceptionWhenResponseIsEmpty() {
         // Given
-        when(mockResponseSpec.body(List.class)).thenReturn(List.of());
+        when(mockResponseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(List.of());
 
         // When/Then
         assertThatThrownBy(() -> client.fetchCountryData("XX"))
@@ -112,90 +115,103 @@ class RestCountriesClientTest {
 
     @Test
     void throwsExceptionWhenPopulationIsMissing() {
-        // Given - response without population
-        Map<String, Object> countryData = new HashMap<>();
-        countryData.put("currencies", Map.of("EUR", Map.of("symbol", "€", "name", "Euro")));
-        countryData.put("languages", Map.of("eng", "English"));
+        // Given - response without population (0 is invalid)
+        RestCountriesResponse countryResponse = new RestCountriesResponse(
+            0,
+            Map.of("EUR", new CurrencyInfo("€", "Euro")),
+            Map.of("eng", "English")
+        );
         
-        List<Map<String, Object>> response = List.of(countryData);
-        when(mockResponseSpec.body(List.class)).thenReturn(response);
+        List<RestCountriesResponse> response = List.of(countryResponse);
+        when(mockResponseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(response);
 
         // When/Then
         assertThatThrownBy(() -> client.fetchCountryData("XX"))
             .isInstanceOf(EnrichmentException.class)
-            .hasMessageContaining("Population data not found");
+            .hasMessageContaining("Failed to fetch country data for code: XX")
+            .hasStackTraceContaining("Population data is missing or zero");
     }
 
     @Test
     void throwsExceptionWhenCurrenciesAreMissing() {
         // Given - response without currencies
-        Map<String, Object> countryData = new HashMap<>();
-        countryData.put("population", 1000000);
-        countryData.put("languages", Map.of("eng", "English"));
+        RestCountriesResponse countryResponse = new RestCountriesResponse(
+            1000000,
+            null,
+            Map.of("eng", "English")
+        );
         
-        List<Map<String, Object>> response = List.of(countryData);
-        when(mockResponseSpec.body(List.class)).thenReturn(response);
+        List<RestCountriesResponse> response = List.of(countryResponse);
+        when(mockResponseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(response);
 
         // When/Then
         assertThatThrownBy(() -> client.fetchCountryData("XX"))
             .isInstanceOf(EnrichmentException.class)
-            .hasMessageContaining("Currencies data not found");
+            .hasMessageContaining("Failed to fetch country data for code: XX")
+            .hasStackTraceContaining("No currency data found");
     }
 
     @Test
     void throwsExceptionWhenLanguagesAreMissing() {
         // Given - response without languages
-        Map<String, Object> countryData = new HashMap<>();
-        countryData.put("population", 1000000);
-        countryData.put("currencies", Map.of("EUR", Map.of("symbol", "€", "name", "Euro")));
+        RestCountriesResponse countryResponse = new RestCountriesResponse(
+            1000000,
+            Map.of("EUR", new CurrencyInfo("€", "Euro")),
+            null
+        );
         
-        List<Map<String, Object>> response = List.of(countryData);
-        when(mockResponseSpec.body(List.class)).thenReturn(response);
+        List<RestCountriesResponse> response = List.of(countryResponse);
+        when(mockResponseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(response);
 
         // When/Then
         assertThatThrownBy(() -> client.fetchCountryData("XX"))
             .isInstanceOf(EnrichmentException.class)
-            .hasMessageContaining("Languages data not found");
+            .hasMessageContaining("Failed to fetch country data for code: XX")
+            .hasStackTraceContaining("No language data found");
     }
 
     @Test
     void throwsExceptionWhenCurrenciesObjectIsEmpty() {
         // Given - empty currencies object
-        Map<String, Object> countryData = new HashMap<>();
-        countryData.put("population", 1000000);
-        countryData.put("currencies", Map.of());
-        countryData.put("languages", Map.of("eng", "English"));
+        RestCountriesResponse countryResponse = new RestCountriesResponse(
+            1000000,
+            Map.of(),
+            Map.of("eng", "English")
+        );
         
-        List<Map<String, Object>> response = List.of(countryData);
-        when(mockResponseSpec.body(List.class)).thenReturn(response);
+        List<RestCountriesResponse> response = List.of(countryResponse);
+        when(mockResponseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(response);
 
         // When/Then
         assertThatThrownBy(() -> client.fetchCountryData("XX"))
             .isInstanceOf(EnrichmentException.class)
-            .hasMessageContaining("No currency codes found");
+            .hasMessageContaining("Failed to fetch country data for code: XX")
+            .hasStackTraceContaining("No currency data found");
     }
 
     @Test
     void throwsExceptionWhenLanguagesObjectIsEmpty() {
         // Given - empty languages object
-        Map<String, Object> countryData = new HashMap<>();
-        countryData.put("population", 1000000);
-        countryData.put("currencies", Map.of("EUR", Map.of("symbol", "€", "name", "Euro")));
-        countryData.put("languages", Map.of());
+        RestCountriesResponse countryResponse = new RestCountriesResponse(
+            1000000,
+            Map.of("EUR", new CurrencyInfo("€", "Euro")),
+            Map.of()
+        );
         
-        List<Map<String, Object>> response = List.of(countryData);
-        when(mockResponseSpec.body(List.class)).thenReturn(response);
+        List<RestCountriesResponse> response = List.of(countryResponse);
+        when(mockResponseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(response);
 
         // When/Then
         assertThatThrownBy(() -> client.fetchCountryData("XX"))
             .isInstanceOf(EnrichmentException.class)
-            .hasMessageContaining("No languages found");
+            .hasMessageContaining("Failed to fetch country data for code: XX")
+            .hasStackTraceContaining("No language data found");
     }
 
     @Test
     void throwsExceptionWhenApiCallFails() {
         // Given
-        when(mockResponseSpec.body(List.class))
+        when(mockResponseSpec.body(any(ParameterizedTypeReference.class)))
             .thenThrow(new RuntimeException("API call failed"));
 
         // When/Then

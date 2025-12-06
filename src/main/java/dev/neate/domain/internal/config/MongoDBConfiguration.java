@@ -1,8 +1,6 @@
 package dev.neate.domain.internal.config;
 
-import com.mongodb.MongoClientSettings;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 /**
@@ -22,15 +20,6 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  */
 @Configuration
 @EnableMongoRepositories(basePackages = "dev.neate.domain.internal")
-public class MongoDBConfiguration extends AbstractMongoClientConfiguration {
-
-    @Override
-    protected String getDatabaseName() {
-        return "country-db";
-    }
-
-    @Override
-    protected void configureClientSettings(MongoClientSettings.Builder builder) {
-        builder.uuidRepresentation(org.bson.UuidRepresentation.STANDARD);
-    }
+public class MongoDBConfiguration {
+    // Spring Boot auto-configuration handles the rest based on application.yml
 }
