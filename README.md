@@ -322,6 +322,17 @@ src/
             └── application.yaml                 # Test configuration
 ```
 
+### Adding New Modules
+
+📖 **See [MODULE_GUIDE.md](MODULE_GUIDE.md) for a complete guide on adding new modules with examples**
+
+The guide includes:
+- Step-by-step module creation with concrete Notification Module example
+- Spring Modulith event patterns and best practices
+- Testing strategies for new modules (unit + integration tests)
+- Common pitfalls and troubleshooting tips
+- Complete code examples from package structure to implementation
+
 ### Spring Boot 4.0.0 Notes
 
 This project uses Spring Boot 4.0.0 which has updated package structures:
