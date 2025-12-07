@@ -12,6 +12,62 @@ The application is organized into the following modules:
 - **Enrichment Module** (`dev.neate.enrichment`) - Country data enrichment via external APIs
 - **Event Module** (`dev.neate.event`) - Kafka event production
 
+### Module Architecture Diagram
+
+```mermaid
+graph TD
+    API[API Module] --> Domain[Domain Module]
+    Valid[Validation Module] --> Domain
+    Enrich[Enrichment Module] --> Domain
+    Event[Event Module] --> Domain
+    
+    API -.->|CountryCreatedEvent| Valid
+    Valid -.->|CountryValidatedEvent| Enrich
+    Enrich -.->|CountryEnrichedEvent| Event
+    
+    subgraph "Spring Modulith Modules"
+        API
+        Domain
+        Valid
+        Enrich
+        Event
+    end
+    
+    subgraph "External Systems"
+        RestCountries[RestCountries API]
+        Kafka[Kafka Cluster]
+        MongoDB[(MongoDB Replica Set)]
+    end
+    
+    Enrich --> RestCountries
+    Event --> Kafka
+    Domain --> MongoDB
+```
+
+### Event Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as REST Client
+    participant API as API Module
+    participant Valid as Validation Module
+    participant Enrich as Enrichment Module
+    participant Event as Event Module
+    participant Kafka as Kafka
+    participant MongoDB as MongoDB
+
+    Client->>+API: POST /countries
+    API->>+MongoDB: Save Country (validCountry=false)
+    API->>+Valid: CountryCreatedEvent
+    Valid->>+MongoDB: Validate & Update Country
+    Valid->>+Enrich: CountryValidatedEvent (if valid)
+    Enrich->>+RestCountries: Fetch enrichment data
+    Enrich->>+MongoDB: Save enriched Country
+    Enrich->>+Event: CountryEnrichedEvent
+    Event->>+Kafka: Send enriched country data
+    API-->>-Client: 202 Accepted
+```
+
 ## Features
 
 - ✅ REST API for creating countries
@@ -21,7 +77,7 @@ The application is organized into the following modules:
 - ✅ Country data enrichment from RestCountries API
 - ✅ Kafka event production for enriched countries
 - ✅ Modular design with clear boundaries
-- ✅ Comprehensive test coverage (118 tests)
+- ✅ Comprehensive test coverage (120 tests)
 
 ## Prerequisites
 
@@ -108,15 +164,18 @@ docker exec mongodb mongosh country-db --quiet --eval "db.countries.find().prett
 
 The application can be configured via environment variables:
 
-- `MONGODB_URI` - MongoDB connection URI (default: `mongodb://localhost:27017/?replicaSet=rs0`)
+- `MONGODB_URI` - MongoDB connection URI (default: `mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=rs0`)
 - `MONGODB_DATABASE` - Database name (default: `country-db`)
 - `KAFKA_BOOTSTRAP_SERVERS` - Kafka bootstrap servers (default: `localhost:9092`)
 
-Example:
+### Spring Modulith Event Retry Configuration
 
-```bash
-MONGODB_URI=mongodb://localhost:27017/?replicaSet=rs0 KAFKA_BOOTSTRAP_SERVERS=localhost:9092 mvn spring-boot:run
-```
+Additional configuration options for Spring Modulith event processing:
+
+- `spring.modulith.events.republish-outstanding-events-on-restart` - Enable automatic retry on startup (default: `true`)
+- `spring.modulith.events.retry-scheduled` - Enable scheduled retry for stuck events (default: `false`)
+- `spring.modulith.events.retry-interval` - Scheduled retry interval in milliseconds (default: `300000`)
+- `spring.modulith.events.completion-mode` - Event completion tracking mode (default: `UPDATE`)
 
 ## Running Tests
 
@@ -239,25 +298,28 @@ src/
 ├── main/
 │   └── java/
 │       └── dev/neate/
-│           ├── api/              # REST controllers and DTOs
-│           ├── domain/           # Domain entities and services
-│           │   └── internal/     # Internal implementation details
-│           ├── validation/       # Validation events and logic
-│           │   └── internal/     # Internal validation services
-│           ├── enrichment/       # Enrichment events and logic
-│           │   └── internal/     # Internal enrichment services
-│           ├── event/            # Kafka event production
-│           │   └── internal/     # Internal Kafka producers
-│           └── Application.java
+│           ├── ScheduledEventRetryService.java  # Spring Modulith event retry service
+│           ├── Application.java                 # Main application class
+│           ├── api/                              # REST controllers and DTOs
+│           ├── domain/                           # Domain entities and services
+│           │   └── internal/                     # Internal implementation details
+│           ├── validation/                       # Validation events and logic
+│           │   └── internal/                     # Internal validation services
+│           ├── enrichment/                       # Enrichment events and logic
+│           │   └── internal/                     # Internal enrichment services
+│           └── event/                            # Kafka event production
+│               └── internal/                     # Internal Kafka producers
 └── test/
     └── java/
         └── dev/neate/
-            ├── api/              # API layer tests
-            ├── domain/           # Domain layer tests
-            ├── validation/       # Validation layer tests
-            ├── enrichment/       # Enrichment layer tests
-            ├── event/            # Event layer tests
-            └── TestcontainersConfiguration.java
+            ├── api/                              # API layer tests
+            ├── domain/                           # Domain layer tests
+            ├── validation/                       # Validation layer tests
+            ├── enrichment/                       # Enrichment layer tests
+            ├── event/                            # Event layer tests
+            ├── MongoTestcontainersConfiguration.java    # MongoDB Testcontainers config
+            ├── KafkaTestcontainersConfiguration.java   # Kafka Testcontainers config
+            └── application.yaml                 # Test configuration
 ```
 
 ### Spring Boot 4.0.0 Notes
