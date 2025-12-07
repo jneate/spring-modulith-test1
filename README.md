@@ -55,7 +55,7 @@ The application is organized into the following modules:
 
 **Alternative approaches:**
 1. Run the Spring Boot application inside Docker on the same network
-2. Use localhost ports (27017, 27018, 27019) instead of hostnames
+2. Use localhost ports (27017, 27018, 27019) instead of hostnames (This doesn't work well with a replica set)
 3. Assign static IPs to containers and use IP addresses directly in configuration
 
 ### 2. Start backing services
@@ -171,6 +171,64 @@ Creates a new country and triggers asynchronous validation.
 
 **Kafka Topics:**
 - `country-events` - Enriched country data in JSON format
+
+## Event Retry Configuration
+
+Spring Modulith 2.0.0 provides automatic retry mechanisms for failed events using the Event Publication Registry (MongoDB).
+
+### Automatic Retry on Startup
+
+Enable automatic retry of incomplete events when the application starts:
+
+```yaml
+spring:
+  modulith:
+    events:
+      republish-outstanding-events-on-restart: true
+```
+
+### Scheduled Retry
+
+For production environments, you can enable scheduled retry of stuck events:
+
+```yaml
+spring:
+  modulith:
+    events:
+      retry-scheduled: true
+      retry-interval: 300000  # 5 minutes (default)
+```
+
+**Implementation Note:** The application includes a `ScheduledEventRetryService` component that can be enabled via the `spring.modulith.events.retry-scheduled=true` property. This service runs every 5 minutes and retries events that have been incomplete for more than 1 minute.
+
+### Manual Retry (Optional)
+
+For administrative control, you could implement a REST controller to manually trigger retries:
+
+```java
+@RestController
+@RequestMapping("/admin/events")
+public class EventRetryController {
+    
+    @PostMapping("/retry")
+    public ResponseEntity<?> retryEvents(@RequestParam(defaultValue = "5") int olderThanMinutes) {
+        // Manually retry events older than specified minutes
+        retryService.manuallyRetryEvents(Duration.ofMinutes(olderThanMinutes));
+        return ResponseEntity.ok(Map.of("status", "completed"));
+    }
+}
+```
+
+This would provide endpoints like:
+- `POST /admin/events/retry?olderThanMinutes=5` - Retry events older than 5 minutes
+- `POST /admin/events/retry-all` - Retry all incomplete events
+
+### Monitoring
+
+Event retry attempts are logged at DEBUG/INFO levels. Monitor logs for:
+- `Starting scheduled retry of incomplete events`
+- `Manual retry requested for events older than X minutes`
+- `Error during scheduled event retry`
 
 ## Development
 

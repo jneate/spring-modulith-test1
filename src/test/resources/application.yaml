@@ -1,4 +1,3 @@
 spring:
-  data:
-    mongodb:
-      database: test-country-db
+  mongodb:
+    database: test-country-db
